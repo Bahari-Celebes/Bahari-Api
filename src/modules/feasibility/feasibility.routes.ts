@@ -1,13 +1,13 @@
 import { Hono } from "hono";
 import { eq, sql, and } from "drizzle-orm";
-import type { AppEnv } from "../../lib/types";
-import { authMiddleware, getCurrentUser } from "../../middleware/auth";
-import { requireRole, assertCooperativeScope } from "../../middleware/rbac";
-import { db } from "../../db";
-import { feasibilityScenarios } from "../../db/schema";
-import { success, paginated, parsePagination, getOffset } from "../../lib/response";
-import { NotFoundError } from "../../lib/errors";
-import { calculateFeasibility, SCENARIO_PRESETS, type FeasibilityInput } from "../../engine";
+import type { AppEnv } from "../../lib/types.js";
+import { authMiddleware, getCurrentUser } from "../../middleware/auth.js";
+import { requireRole, assertCooperativeScope } from "../../middleware/rbac.js";
+import { db } from "../../db/index.js";
+import { feasibilityScenarios } from "../../db/schema/index.js";
+import { success, paginated, parsePagination, getOffset } from "../../lib/response.js";
+import { NotFoundError } from "../../lib/errors.js";
+import { calculateFeasibility, SCENARIO_PRESETS, type FeasibilityInput } from "../../engine/index.js";
 import { z } from "zod";
 
 export const feasibilityRoutes = new Hono<AppEnv>();

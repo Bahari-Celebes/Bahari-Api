@@ -1,6 +1,6 @@
 // Supply-chain margin analysis. Pure functions over per-commodity records.
 
-import type { MarginAnalysisInput, MarginResult } from "./types";
+import type { MarginAnalysisInput, MarginResult } from "./types.js";
 
 export function calculateMargin(input: MarginAnalysisInput): MarginResult {
   const { buyPrice, sellPrice, actualSellPrice, volume, logisticsCost, spoilageRate } = input;

@@ -1,15 +1,15 @@
 // Self-check for the engine. Run: `bun run packages/engine/src/self-check.ts`
 // Assert-based, no test framework. Guards the math that money/decisions depend on.
 
-import { npv } from "./npv";
-import { irr } from "./irr";
-import { bcr } from "./bcr";
-import { paybackPeriod } from "./payback";
-import { calculateMargin } from "./margin-analysis";
-import { calculateFeasibility } from "./feasibility";
-import { calculateAllSwitchingValues } from "./switching-value";
-import { SCENARIO_PRESETS } from "./scenarios";
-import type { FeasibilityInput } from "./types";
+import { npv } from "./npv.js";
+import { irr } from "./irr.js";
+import { bcr } from "./bcr.js";
+import { paybackPeriod } from "./payback.js";
+import { calculateMargin } from "./margin-analysis.js";
+import { calculateFeasibility } from "./feasibility.js";
+import { calculateAllSwitchingValues } from "./switching-value.js";
+import { SCENARIO_PRESETS } from "./scenarios.js";
+import type { FeasibilityInput } from "./types.js";
 
 function assert(cond: boolean, msg: string) {
   if (!cond) {

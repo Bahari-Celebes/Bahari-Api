@@ -1,10 +1,10 @@
 import { eq } from "drizzle-orm";
-import { db } from "../../db";
-import { users } from "../../db/schema";
-import { hashPassword, verifyPassword } from "../../lib/password";
-import { generateToken, TOKEN_TTL_SECONDS } from "../../lib/jwt";
-import { ConflictError, NotFoundError, UnauthorizedError } from "../../lib/errors";
-import type { RegisterInput, LoginInput } from "./auth.schema";
+import { db } from "../../db/index.js";
+import { users } from "../../db/schema/index.js";
+import { hashPassword, verifyPassword } from "../../lib/password.js";
+import { generateToken, TOKEN_TTL_SECONDS } from "../../lib/jwt.js";
+import { ConflictError, NotFoundError, UnauthorizedError } from "../../lib/errors.js";
+import type { RegisterInput, LoginInput } from "./auth.schema.js";
 
 const publicUser = {
   id: users.id,

@@ -1,12 +1,12 @@
 import { Hono } from "hono";
 import { eq, sql, and, gte, lte } from "drizzle-orm";
-import type { AppEnv } from "../../lib/types";
-import { authMiddleware, getCurrentUser } from "../../middleware/auth";
-import { requireRole } from "../../middleware/rbac";
-import { db } from "../../db";
-import { commodityRecords } from "../../db/schema";
-import { success } from "../../lib/response";
-import { calculateMargin, type MarginAnalysisInput } from "../../engine";
+import type { AppEnv } from "../../lib/types.js";
+import { authMiddleware, getCurrentUser } from "../../middleware/auth.js";
+import { requireRole } from "../../middleware/rbac.js";
+import { db } from "../../db/index.js";
+import { commodityRecords } from "../../db/schema/index.js";
+import { success } from "../../lib/response.js";
+import { calculateMargin, type MarginAnalysisInput } from "../../engine/index.js";
 
 export const supplyChainRoutes = new Hono<AppEnv>();
 

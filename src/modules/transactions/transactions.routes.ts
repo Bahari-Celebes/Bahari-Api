@@ -1,12 +1,12 @@
 import { Hono } from "hono";
 import { eq, ilike, sql, and, gte, lte } from "drizzle-orm";
-import type { AppEnv } from "../../lib/types";
-import { authMiddleware, getCurrentUser } from "../../middleware/auth";
-import { requireRole, assertCooperativeScope } from "../../middleware/rbac";
-import { db } from "../../db";
-import { transactionRecords } from "../../db/schema";
-import { success, paginated, parsePagination, getOffset } from "../../lib/response";
-import { NotFoundError } from "../../lib/errors";
+import type { AppEnv } from "../../lib/types.js";
+import { authMiddleware, getCurrentUser } from "../../middleware/auth.js";
+import { requireRole, assertCooperativeScope } from "../../middleware/rbac.js";
+import { db } from "../../db/index.js";
+import { transactionRecords } from "../../db/schema/index.js";
+import { success, paginated, parsePagination, getOffset } from "../../lib/response.js";
+import { NotFoundError } from "../../lib/errors.js";
 import { z } from "zod";
 
 export const transactionRoutes = new Hono<AppEnv>();

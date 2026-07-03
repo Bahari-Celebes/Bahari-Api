@@ -1,7 +1,7 @@
 // Internal Rate of Return — bisection solver over monthly cash flows.
 // Returns the monthly IRR; multiply by 12 for annualized. null if no sign change (never converges).
 
-import { npv } from "./npv";
+import { npv } from "./npv.js";
 
 export function irr(
   cashFlows: number[],

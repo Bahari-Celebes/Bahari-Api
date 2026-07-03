@@ -7,7 +7,7 @@ import {
   index,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
-import { cooperatives } from "./cooperatives";
+import { cooperatives } from "./cooperatives.js";
 
 // --- Role Enum (BAHARI Intelligence) ---
 export const userRoleEnum = pgEnum("user_role", [

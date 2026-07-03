@@ -1,6 +1,6 @@
 import type { Context, Next } from "hono";
-import { ForbiddenError, UnauthorizedError } from "../lib/errors";
-import type { AppEnv, JwtPayload, UserRole } from "../lib/types";
+import { ForbiddenError, UnauthorizedError } from "../lib/errors.js";
+import type { AppEnv, JwtPayload, UserRole } from "../lib/types.js";
 
 /**
  * Role-based access control middleware

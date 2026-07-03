@@ -1,8 +1,8 @@
 import { Hono } from "hono";
-import type { AppEnv } from "../../lib/types";
-import { authMiddleware, getCurrentUser } from "../../middleware/auth";
-import { requireRole } from "../../middleware/rbac";
-import { success } from "../../lib/response";
+import type { AppEnv } from "../../lib/types.js";
+import { authMiddleware, getCurrentUser } from "../../middleware/auth.js";
+import { requireRole } from "../../middleware/rbac.js";
+import { success } from "../../lib/response.js";
 import {
   calculateFeasibility,
   calculateSwitchingValue,
@@ -10,7 +10,7 @@ import {
   SCENARIO_PRESETS,
   type FeasibilityInput,
   type ScenarioAdjustments,
-} from "../../engine";
+} from "../../engine/index.js";
 import { z } from "zod";
 
 export const scenarioRoutes = new Hono<AppEnv>();

@@ -2,7 +2,7 @@
 // benefits and costs are parallel per-period streams; both discounted at annualRate.
 // Returns 0 when costs are zero (avoids div-by-zero, NFR-004).
 
-import { npv } from "./npv";
+import { npv } from "./npv.js";
 
 export function bcr(
   benefits: number[],

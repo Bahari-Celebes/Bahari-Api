@@ -1,11 +1,11 @@
 import { Hono } from "hono";
 import { eq, sql, and, count, sum } from "drizzle-orm";
-import type { AppEnv } from "../../lib/types";
-import { authMiddleware } from "../../middleware/auth";
-import { requireRole } from "../../middleware/rbac";
-import { db } from "../../db";
-import { cooperatives, users, commodityRecords, transactionRecords } from "../../db/schema";
-import { success } from "../../lib/response";
+import type { AppEnv } from "../../lib/types.js";
+import { authMiddleware } from "../../middleware/auth.js";
+import { requireRole } from "../../middleware/rbac.js";
+import { db } from "../../db/index.js";
+import { cooperatives, users, commodityRecords, transactionRecords } from "../../db/schema/index.js";
+import { success } from "../../lib/response.js";
 
 export const impactRoutes = new Hono<AppEnv>();
 

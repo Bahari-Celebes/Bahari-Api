@@ -1,10 +1,10 @@
 import { Hono } from "hono";
 import { eq, gte, or, and } from "drizzle-orm";
-import type { AppEnv } from "../../lib/types";
-import { authMiddleware, getCurrentUser } from "../../middleware/auth";
-import { db } from "../../db";
-import { commodityRecords, transactionRecords, feasibilityScenarios } from "../../db/schema";
-import { success } from "../../lib/response";
+import type { AppEnv } from "../../lib/types.js";
+import { authMiddleware, getCurrentUser } from "../../middleware/auth.js";
+import { db } from "../../db/index.js";
+import { commodityRecords, transactionRecords, feasibilityScenarios } from "../../db/schema/index.js";
+import { success } from "../../lib/response.js";
 import { z } from "zod";
 
 export const syncRoutes = new Hono<AppEnv>();

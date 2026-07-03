@@ -10,8 +10,8 @@ import {
   index,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
-import { cooperatives } from "./cooperatives";
-import { commodityRecords } from "./commodity-records";
+import { cooperatives } from "./cooperatives.js";
+import { commodityRecords } from "./commodity-records.js";
 
 export const paymentStatusEnum = pgEnum("payment_status", ["paid", "pending", "delayed"]);
 

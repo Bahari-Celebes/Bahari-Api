@@ -1,5 +1,5 @@
 import type { Context } from "hono";
-import { AppError } from "../lib/errors";
+import { AppError } from "../lib/errors.js";
 
 /**
  * Global error handler for the API

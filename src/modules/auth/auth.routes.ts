@@ -1,9 +1,9 @@
 import { Hono } from "hono";
-import type { AppEnv } from "../../lib/types";
-import { authMiddleware, getCurrentUser } from "../../middleware/auth";
-import { loginSchema, registerSchema } from "./auth.schema";
-import * as authService from "./auth.service";
-import { success } from "../../lib/response";
+import type { AppEnv } from "../../lib/types.js";
+import { authMiddleware, getCurrentUser } from "../../middleware/auth.js";
+import { loginSchema, registerSchema } from "./auth.schema.js";
+import * as authService from "./auth.service.js";
+import { success } from "../../lib/response.js";
 
 export const authRoutes = new Hono<AppEnv>();
 

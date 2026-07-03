@@ -1,7 +1,7 @@
 import type { Context, Next } from "hono";
-import { verifyToken } from "../lib/jwt";
-import { UnauthorizedError } from "../lib/errors";
-import type { AppEnv } from "../lib/types";
+import { verifyToken } from "../lib/jwt.js";
+import { UnauthorizedError } from "../lib/errors.js";
+import type { AppEnv } from "../lib/types.js";
 
 /**
  * Authentication middleware

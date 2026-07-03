@@ -1,18 +1,18 @@
 import "dotenv/config";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { authRoutes } from "../src/modules/auth/auth.routes";
-import { cooperativeRoutes } from "../src/modules/cooperatives/cooperatives.routes";
-import { commodityRoutes } from "../src/modules/commodities/commodities.routes";
-import { transactionRoutes } from "../src/modules/transactions/transactions.routes";
-import { supplyChainRoutes } from "../src/modules/supply-chain/supply-chain.routes";
-import { feasibilityRoutes } from "../src/modules/feasibility/feasibility.routes";
-import { scenarioRoutes } from "../src/modules/scenarios/scenarios.routes";
-import { impactRoutes } from "../src/modules/impact/impact.routes";
-import { aiCopilotRoutes } from "../src/modules/ai-copilot/ai-copilot.routes";
-import { syncRoutes } from "../src/modules/sync/sync.routes";
-import { errorHandler } from "../src/middleware/error-handler";
-import type { AppEnv } from "../src/lib/types";
+import { authRoutes } from "../src/modules/auth/auth.routes.js";
+import { cooperativeRoutes } from "../src/modules/cooperatives/cooperatives.routes.js";
+import { commodityRoutes } from "../src/modules/commodities/commodities.routes.js";
+import { transactionRoutes } from "../src/modules/transactions/transactions.routes.js";
+import { supplyChainRoutes } from "../src/modules/supply-chain/supply-chain.routes.js";
+import { feasibilityRoutes } from "../src/modules/feasibility/feasibility.routes.js";
+import { scenarioRoutes } from "../src/modules/scenarios/scenarios.routes.js";
+import { impactRoutes } from "../src/modules/impact/impact.routes.js";
+import { aiCopilotRoutes } from "../src/modules/ai-copilot/ai-copilot.routes.js";
+import { syncRoutes } from "../src/modules/sync/sync.routes.js";
+import { errorHandler } from "../src/middleware/error-handler.js";
+import type { AppEnv } from "../src/lib/types.js";
 
 const app = new Hono<AppEnv>();
 

@@ -8,7 +8,7 @@ import {
   index,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
-import { cooperatives } from "./cooperatives";
+import { cooperatives } from "./cooperatives.js";
 
 // --- Feasibility Scenarios Table (SRS 3.6.5) ---
 export const feasibilityScenarios = pgTable(

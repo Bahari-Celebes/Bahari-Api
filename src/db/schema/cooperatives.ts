@@ -8,10 +8,10 @@ import {
   index,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
-import { users } from "./users";
-import { commodityRecords } from "./commodity-records";
-import { transactionRecords } from "./transaction-records";
-import { feasibilityScenarios } from "./feasibility-scenarios";
+import { users } from "./users.js";
+import { commodityRecords } from "./commodity-records.js";
+import { transactionRecords } from "./transaction-records.js";
+import { feasibilityScenarios } from "./feasibility-scenarios.js";
 
 // --- Cooperatives Table (SRS 3.6.2) ---
 export const cooperatives = pgTable(

@@ -3,9 +3,9 @@
 // Idempotent via reset-then-seed. Run: bun run db:seed
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import { users, cooperatives, commodityRecords, transactionRecords, feasibilityScenarios } from "./schema";
-import { hashPassword } from "../lib/password";
-import { calculateFeasibility, type FeasibilityInput, NO_ADJUSTMENT } from "../engine";
+import { users, cooperatives, commodityRecords, transactionRecords, feasibilityScenarios } from "./schema/index.js";
+import { hashPassword } from "../lib/password.js";
+import { calculateFeasibility, type FeasibilityInput, NO_ADJUSTMENT } from "../engine/index.js";
 
 const seedClient = postgres(process.env.DATABASE_URL!, { max: 1 });
 const db = drizzle(seedClient);

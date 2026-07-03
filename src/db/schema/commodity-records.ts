@@ -9,8 +9,8 @@ import {
   index,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
-import { cooperatives } from "./cooperatives";
-import { transactionRecords } from "./transaction-records";
+import { cooperatives } from "./cooperatives.js";
+import { transactionRecords } from "./transaction-records.js";
 
 // --- Commodity Records Table (SRS 3.6.3) ---
 export const commodityRecords = pgTable(

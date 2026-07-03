@@ -1,4 +1,4 @@
-import type { ApiResponse, PaginatedResponse, PaginationParams } from "./types";
+import type { ApiResponse, PaginatedResponse, PaginationParams } from "./types.js";
 
 /**
  * Create a successful API response

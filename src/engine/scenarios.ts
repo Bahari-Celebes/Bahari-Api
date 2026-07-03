@@ -1,8 +1,8 @@
 // Scenario presets (SRS FR-009): optimis, moderat, pesimis.
 // Moderate = baseline (no adjustment). Optimis/pesimis per overview Modul 4.
 
-import type { ScenarioAdjustments } from "./types";
-import { NO_ADJUSTMENT } from "./types";
+import type { ScenarioAdjustments } from "./types.js";
+import { NO_ADJUSTMENT } from "./types.js";
 
 export interface ScenarioPreset {
   name: "optimis" | "moderat" | "pesimis";

@@ -1,5 +1,5 @@
 import { SignJWT, jwtVerify } from "jose";
-import type { JwtPayload } from "./types";
+import type { JwtPayload } from "./types.js";
 
 const JWT_SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET || "bahari-dev-secret-change-in-production"

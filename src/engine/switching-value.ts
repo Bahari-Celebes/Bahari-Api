@@ -1,13 +1,13 @@
 // Switching value — the fractional change in a single variable at which the
 // project flips from layak/waspada to tidak_layak. Iterative search (SRS 3.8).
 
-import { calculateFeasibility } from "./feasibility";
+import { calculateFeasibility } from "./feasibility.js";
 import type {
   FeasibilityInput,
   ScenarioAdjustments,
   SwitchingValue,
-} from "./types";
-import { NO_ADJUSTMENT } from "./types";
+} from "./types.js";
+import { NO_ADJUSTMENT } from "./types.js";
 
 type Variable = keyof ScenarioAdjustments;
 

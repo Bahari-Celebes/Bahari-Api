@@ -2,17 +2,17 @@
 // scenario adjustments), then runs NPV / IRR / BCR / Payback. Applies the
 // layak/waspada/tidak_layak status rule (SRS 3.7 rule 5).
 
-import { npv } from "./npv";
-import { irr } from "./irr";
-import { bcr } from "./bcr";
-import { paybackPeriod } from "./payback";
+import { npv } from "./npv.js";
+import { irr } from "./irr.js";
+import { bcr } from "./bcr.js";
+import { paybackPeriod } from "./payback.js";
 import type {
   FeasibilityInput,
   FeasibilityResult,
   FeasibilityStatus,
   ScenarioAdjustments,
-} from "./types";
-import { NO_ADJUSTMENT } from "./types";
+} from "./types.js";
+import { NO_ADJUSTMENT } from "./types.js";
 
 export interface CashFlowBuild {
   net: number[]; // index 0 = -capex, then monthly net
