@@ -53,7 +53,7 @@ cooperativeRoutes.post("/", authMiddleware, requireRole("admin"), async (c) => {
 
 // --- GET /cooperatives/:id ---
 cooperativeRoutes.get("/:id", authMiddleware, async (c) => {
-  const id = c.req.param("id");
+  const id = c.req.param("id") as string;
   const [coop] = await db.select().from(cooperatives).where(eq(cooperatives.id, id)).limit(1);
   if (!coop) throw new NotFoundError("Cooperative", id);
 
@@ -65,7 +65,7 @@ cooperativeRoutes.get("/:id", authMiddleware, async (c) => {
 
 // --- PATCH /cooperatives/:id ---
 cooperativeRoutes.patch("/:id", authMiddleware, requireRole("admin", "cooperative_manager"), async (c) => {
-  const id = c.req.param("id");
+  const id = c.req.param("id") as string;
   const body = await c.req.json();
   const data = updateSchema.parse(body);
 
@@ -82,7 +82,7 @@ cooperativeRoutes.patch("/:id", authMiddleware, requireRole("admin", "cooperativ
 
 // --- GET /cooperatives/:id/baseline (FR-004) ---
 cooperativeRoutes.get("/:id/baseline", authMiddleware, async (c) => {
-  const id = c.req.param("id");
+  const id = c.req.param("id") as string;
   const [coop] = await db.select().from(cooperatives).where(eq(cooperatives.id, id)).limit(1);
   if (!coop) throw new NotFoundError("Cooperative", id);
 

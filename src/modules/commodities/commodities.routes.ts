@@ -58,13 +58,22 @@ commodityRoutes.post("/", authMiddleware, requireRole("cooperative_manager", "op
   const data = createSchema.parse(body);
   assertCooperativeScope(user, data.cooperativeId);
 
-  const [record] = await db.insert(commodityRecords).values(data).returning();
+  const insertData = {
+    ...data,
+    volume: String(data.volume),
+    buyPrice: String(data.buyPrice),
+    expectedSellPrice: String(data.expectedSellPrice),
+    actualSellPrice: data.actualSellPrice !== undefined ? String(data.actualSellPrice) : undefined,
+    spoilagePercentage: String(data.spoilagePercentage),
+  };
+
+  const [record] = await db.insert(commodityRecords).values(insertData).returning();
   return c.json(success(record), 201);
 });
 
 // --- GET /commodities/:id ---
 commodityRoutes.get("/:id", authMiddleware, async (c) => {
-  const id = c.req.param("id");
+  const id = c.req.param("id") as string;
   const [record] = await db.select().from(commodityRecords).where(eq(commodityRecords.id, id)).limit(1);
   if (!record) throw new NotFoundError("CommodityRecord", id);
   return c.json(success(record));
@@ -72,16 +81,27 @@ commodityRoutes.get("/:id", authMiddleware, async (c) => {
 
 // --- PATCH /commodities/:id ---
 commodityRoutes.patch("/:id", authMiddleware, requireRole("cooperative_manager", "operator"), async (c) => {
-  const id = c.req.param("id");
+  const id = c.req.param("id") as string;
   const body = await c.req.json();
   const data = updateSchema.parse(body);
 
   const [existing] = await db.select().from(commodityRecords).where(eq(commodityRecords.id, id)).limit(1);
   if (!existing) throw new NotFoundError("CommodityRecord", id);
 
+  const { volume, buyPrice, expectedSellPrice, actualSellPrice, spoilagePercentage, ...rest } = data;
+  const updateData = {
+    ...rest,
+    ...(volume !== undefined && { volume: String(volume) }),
+    ...(buyPrice !== undefined && { buyPrice: String(buyPrice) }),
+    ...(expectedSellPrice !== undefined && { expectedSellPrice: String(expectedSellPrice) }),
+    ...(actualSellPrice !== undefined && { actualSellPrice: String(actualSellPrice) }),
+    ...(spoilagePercentage !== undefined && { spoilagePercentage: String(spoilagePercentage) }),
+    updatedAt: new Date(),
+  };
+
   const [updated] = await db
     .update(commodityRecords)
-    .set({ ...data, updatedAt: new Date() })
+    .set(updateData)
     .where(eq(commodityRecords.id, id))
     .returning();
   return c.json(success(updated));
@@ -89,7 +109,7 @@ commodityRoutes.patch("/:id", authMiddleware, requireRole("cooperative_manager",
 
 // --- DELETE /commodities/:id ---
 commodityRoutes.delete("/:id", authMiddleware, requireRole("cooperative_manager"), async (c) => {
-  const id = c.req.param("id");
+  const id = c.req.param("id") as string;
   await db.delete(commodityRecords).where(eq(commodityRecords.id, id));
   return c.json(success({ deleted: true }));
 });
@@ -106,7 +126,16 @@ commodityRoutes.post("/import", authMiddleware, requireRole("cooperative_manager
   for (let i = 0; i < rows.length; i++) {
     try {
       assertCooperativeScope(user, rows[i].cooperativeId);
-      const [record] = await db.insert(commodityRecords).values(rows[i]).returning();
+      const row = rows[i];
+      const insertData = {
+        ...row,
+        volume: String(row.volume),
+        buyPrice: String(row.buyPrice),
+        expectedSellPrice: String(row.expectedSellPrice),
+        actualSellPrice: row.actualSellPrice !== undefined ? String(row.actualSellPrice) : undefined,
+        spoilagePercentage: String(row.spoilagePercentage),
+      };
+      const [record] = await db.insert(commodityRecords).values(insertData).returning();
       inserted.push(record);
     } catch (e: any) {
       errors.push({ index: i, message: e.message });

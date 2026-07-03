@@ -100,6 +100,18 @@ feasibilityRoutes.post("/scenarios", authMiddleware, requireRole("cooperative_ma
     .insert(feasibilityScenarios)
     .values({
       ...data,
+      capex: String(data.capex),
+      monthlyOpex: String(data.monthlyOpex),
+      monthlyRevenue: String(data.monthlyRevenue),
+      margin: String(data.margin),
+      discountRate: String(data.discountRate),
+      growthRate: String(data.growthRate),
+      logisticsCost: String(data.logisticsCost),
+      spoilageAssumption: String(data.spoilageAssumption),
+      priceAdjustment: String(data.priceAdjustment),
+      costAdjustment: String(data.costAdjustment),
+      volumeAdjustment: String(data.volumeAdjustment),
+      spoilageAdjustment: String(data.spoilageAdjustment),
       resultNpv: String(Math.round(result.npv)),
       resultIrr: result.irr !== null ? String(result.irr) : null,
       resultPaybackPeriod: result.paybackPeriod !== null ? String(result.paybackPeriod) : null,
@@ -112,7 +124,7 @@ feasibilityRoutes.post("/scenarios", authMiddleware, requireRole("cooperative_ma
 
 // --- GET /feasibility/scenarios/:id ---
 feasibilityRoutes.get("/scenarios/:id", authMiddleware, async (c) => {
-  const id = c.req.param("id");
+  const id = c.req.param("id") as string;
   const [scenario] = await db.select().from(feasibilityScenarios).where(eq(feasibilityScenarios.id, id)).limit(1);
   if (!scenario) throw new NotFoundError("FeasibilityScenario", id);
   return c.json(success(scenario));
@@ -120,7 +132,7 @@ feasibilityRoutes.get("/scenarios/:id", authMiddleware, async (c) => {
 
 // --- DELETE /feasibility/scenarios/:id ---
 feasibilityRoutes.delete("/scenarios/:id", authMiddleware, requireRole("cooperative_manager"), async (c) => {
-  const id = c.req.param("id");
+  const id = c.req.param("id") as string;
   await db.delete(feasibilityScenarios).where(eq(feasibilityScenarios.id, id));
   return c.json(success({ deleted: true }));
 });
