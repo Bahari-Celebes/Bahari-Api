@@ -5,16 +5,15 @@ export type AppEnv = {
   };
 };
 
+// --- User Roles (BAHARI Intelligence) ---
+export type UserRole = "admin" | "cooperative_manager" | "operator" | "reviewer";
+
 // --- JWT Payload ---
 export type JwtPayload = {
   userId: string;
   role: UserRole;
   cooperativeId?: string;
-  producerId?: string;
 };
-
-// --- User Roles ---
-export type UserRole = "super_admin" | "cooperative_admin" | "producer" | "buyer";
 
 // --- API Response Types ---
 export type ApiResponse<T> = {

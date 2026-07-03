@@ -1,81 +1,117 @@
 import { Hono } from "hono";
-import { eq, ilike, sql, and } from "drizzle-orm";
+import { eq, ilike, sql, and, gte, lte } from "drizzle-orm";
 import type { AppEnv } from "../../lib/types";
-import { authMiddleware } from "../../middleware/auth";
-import { requireRole } from "../../middleware/rbac";
+import { authMiddleware, getCurrentUser } from "../../middleware/auth";
+import { requireRole, assertCooperativeScope } from "../../middleware/rbac";
 import { db } from "../../db";
-import { commodities } from "../../db/schema";
+import { commodityRecords } from "../../db/schema";
 import { success, paginated, parsePagination, getOffset } from "../../lib/response";
-import { NotFoundError } from "../../lib/errors";
+import { NotFoundError, ValidationError } from "../../lib/errors";
 import { z } from "zod";
 
 export const commodityRoutes = new Hono<AppEnv>();
 
-const createCommoditySchema = z.object({
-  name: z.string().min(2),
-  category: z.enum([
-    "fresh_seafood", "aquaculture", "seaweed", "salt",
-    "coastal_agriculture", "processed_food", "handicraft", "recycled_material",
-  ]),
+const createSchema = z.object({
+  cooperativeId: z.string().uuid(),
+  commodityName: z.string().min(1),
+  category: z.string().min(1),
+  volume: z.number().positive(),
   unit: z.string().min(1),
-  description: z.string().optional(),
-  storageType: z
-    .enum(["cold_storage", "chilled", "dry_storage", "room_temperature", "frozen", "none"])
-    .default("none"),
+  sourceGroup: z.string().min(1),
+  buyPrice: z.number().positive(),
+  expectedSellPrice: z.number().positive(),
+  actualSellPrice: z.number().positive().optional(),
+  spoilagePercentage: z.number().min(0).max(1).default(0),
+  date: z.string(), // YYYY-MM-DD
 });
 
+const updateSchema = createSchema.partial().omit({ cooperativeId: true });
+
 // --- GET /commodities ---
-commodityRoutes.get("/", async (c) => {
+commodityRoutes.get("/", authMiddleware, async (c) => {
   const { page, limit } = parsePagination(c.req.query());
+  const cooperativeId = c.req.query("cooperativeId");
   const category = c.req.query("category");
   const search = c.req.query("search");
+  const dateFrom = c.req.query("dateFrom");
+  const dateTo = c.req.query("dateTo");
 
   const conditions = [];
-  if (category) {
-    conditions.push(eq(commodities.category, category as any));
-  }
-  if (search) {
-    conditions.push(ilike(commodities.name, `%${search}%`));
-  }
-
+  if (cooperativeId) conditions.push(eq(commodityRecords.cooperativeId, cooperativeId));
+  if (category) conditions.push(eq(commodityRecords.category, category));
+  if (search) conditions.push(ilike(commodityRecords.commodityName, `%${search}%`));
+  if (dateFrom) conditions.push(gte(commodityRecords.date, dateFrom));
+  if (dateTo) conditions.push(lte(commodityRecords.date, dateTo));
   const where = conditions.length > 0 ? and(...conditions) : undefined;
 
   const [data, countResult] = await Promise.all([
-    db.select().from(commodities).where(where).limit(limit).offset(getOffset({ page, limit })).orderBy(commodities.name),
-    db.select({ count: sql<number>`count(*)` }).from(commodities).where(where),
+    db.select().from(commodityRecords).where(where).limit(limit).offset(getOffset({ page, limit })).orderBy(commodityRecords.date),
+    db.select({ count: sql<number>`count(*)` }).from(commodityRecords).where(where),
   ]);
-
   return c.json(paginated(data, { page, limit, total: Number(countResult[0].count) }));
 });
 
 // --- POST /commodities ---
-commodityRoutes.post(
-  "/",
-  authMiddleware,
-  requireRole("super_admin", "cooperative_admin"),
-  async (c) => {
-    const body = await c.req.json();
-    const data = createCommoditySchema.parse(body);
+commodityRoutes.post("/", authMiddleware, requireRole("cooperative_manager", "operator"), async (c) => {
+  const user = getCurrentUser(c);
+  const body = await c.req.json();
+  const data = createSchema.parse(body);
+  assertCooperativeScope(user, data.cooperativeId);
 
-    const [newCommodity] = await db.insert(commodities).values(data).returning();
-
-    return c.json(success(newCommodity), 201);
-  }
-);
+  const [record] = await db.insert(commodityRecords).values(data).returning();
+  return c.json(success(record), 201);
+});
 
 // --- GET /commodities/:id ---
-commodityRoutes.get("/:id", async (c) => {
+commodityRoutes.get("/:id", authMiddleware, async (c) => {
   const id = c.req.param("id");
+  const [record] = await db.select().from(commodityRecords).where(eq(commodityRecords.id, id)).limit(1);
+  if (!record) throw new NotFoundError("CommodityRecord", id);
+  return c.json(success(record));
+});
 
-  const [commodity] = await db
-    .select()
-    .from(commodities)
-    .where(eq(commodities.id, id))
-    .limit(1);
+// --- PATCH /commodities/:id ---
+commodityRoutes.patch("/:id", authMiddleware, requireRole("cooperative_manager", "operator"), async (c) => {
+  const id = c.req.param("id");
+  const body = await c.req.json();
+  const data = updateSchema.parse(body);
 
-  if (!commodity) {
-    throw new NotFoundError("Commodity", id);
+  const [existing] = await db.select().from(commodityRecords).where(eq(commodityRecords.id, id)).limit(1);
+  if (!existing) throw new NotFoundError("CommodityRecord", id);
+
+  const [updated] = await db
+    .update(commodityRecords)
+    .set({ ...data, updatedAt: new Date() })
+    .where(eq(commodityRecords.id, id))
+    .returning();
+  return c.json(success(updated));
+});
+
+// --- DELETE /commodities/:id ---
+commodityRoutes.delete("/:id", authMiddleware, requireRole("cooperative_manager"), async (c) => {
+  const id = c.req.param("id");
+  await db.delete(commodityRecords).where(eq(commodityRecords.id, id));
+  return c.json(success({ deleted: true }));
+});
+
+// --- POST /commodities/import ---
+commodityRoutes.post("/import", authMiddleware, requireRole("cooperative_manager", "operator"), async (c) => {
+  const user = getCurrentUser(c);
+  const body = await c.req.json();
+  const rows = z.array(createSchema).parse(body.rows);
+
+  const errors: { index: number; message: string }[] = [];
+  const inserted: any[] = [];
+
+  for (let i = 0; i < rows.length; i++) {
+    try {
+      assertCooperativeScope(user, rows[i].cooperativeId);
+      const [record] = await db.insert(commodityRecords).values(rows[i]).returning();
+      inserted.push(record);
+    } catch (e: any) {
+      errors.push({ index: i, message: e.message });
+    }
   }
 
-  return c.json(success(commodity));
+  return c.json(success({ inserted: inserted.length, errors }));
 });

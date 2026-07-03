@@ -1,6 +1,6 @@
 import type { Context, Next } from "hono";
 import { ForbiddenError, UnauthorizedError } from "../lib/errors";
-import type { AppEnv, UserRole } from "../lib/types";
+import type { AppEnv, JwtPayload, UserRole } from "../lib/types";
 
 /**
  * Role-based access control middleware
@@ -25,9 +25,10 @@ export function requireRole(...allowedRoles: UserRole[]) {
 }
 
 /**
- * Cooperative access middleware
- * Ensures the user can only access resources belonging to their cooperative
- * Super admin bypasses this check
+ * Cooperative access middleware.
+ * Ensures the user can only access resources belonging to their cooperative.
+ * Checks query/param; for body-scoped routes call assertCooperativeScope in the handler
+ * (reading the body here would consume it before the handler can parse it).
  */
 export function requireCooperativeAccess(cooperativeIdParam = "cooperativeId") {
   return async (c: Context<AppEnv>, next: Next) => {
@@ -37,16 +38,13 @@ export function requireCooperativeAccess(cooperativeIdParam = "cooperativeId") {
       throw new UnauthorizedError("Authentication required");
     }
 
-    // Super admin can access all cooperatives
-    if (user.role === "super_admin") {
+    if (user.role === "admin") {
       await next();
       return;
     }
 
-    // Get cooperative ID from query, body, or param
     const cooperativeId =
-      c.req.query("cooperative_id") ||
-      c.req.param(cooperativeIdParam);
+      c.req.query("cooperative_id") || c.req.param(cooperativeIdParam);
 
     if (cooperativeId && user.cooperativeId !== cooperativeId) {
       throw new ForbiddenError("You can only access your own cooperative's data");
@@ -54,4 +52,21 @@ export function requireCooperativeAccess(cooperativeIdParam = "cooperativeId") {
 
     await next();
   };
+}
+
+/**
+ * Assert that a non-admin user is acting on their own cooperative.
+ * Use in handlers after parsing a body that carries cooperativeId.
+ */
+export function assertCooperativeScope(
+  user: JwtPayload,
+  cooperativeId: string | undefined
+) {
+  if (user.role === "admin") return;
+  if (!user.cooperativeId) {
+    throw new ForbiddenError("Your account is not linked to a cooperative");
+  }
+  if (cooperativeId && cooperativeId !== user.cooperativeId) {
+    throw new ForbiddenError("You can only access your own cooperative's data");
+  }
 }

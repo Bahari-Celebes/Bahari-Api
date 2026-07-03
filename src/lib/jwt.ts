@@ -7,6 +7,9 @@ const JWT_SECRET = new TextEncoder().encode(
 
 const JWT_EXPIRATION = "24h";
 
+/** Token TTL in seconds, surfaced to clients for offline caching. */
+export const TOKEN_TTL_SECONDS = 24 * 60 * 60;
+
 /**
  * Generate a JWT access token
  */
@@ -26,7 +29,6 @@ export async function verifyToken(token: string): Promise<JwtPayload> {
   return {
     userId: payload.userId as string,
     role: payload.role as JwtPayload["role"],
-    cooperativeId: payload.cooperativeId as string | undefined,
-    producerId: payload.producerId as string | undefined,
+    cooperativeId: (payload.cooperativeId as string | undefined) ?? undefined,
   };
 }

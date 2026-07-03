@@ -1,183 +1,152 @@
+// BAHARI Intelligence demo seed (overview 4.8): 1 coastal coop, 4 user roles,
+// 5 commodities, ~30 transactions, 3 feasibility scenarios with pre-computed results.
+// Idempotent via reset-then-seed. Run: bun run db:seed
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import {
-  users, cooperatives, producers, commodities,
-  commodityBatches, marketplaceListings, orders, orderItems,
-  ecoPointTransactions
-} from "./schema";
+import { users, cooperatives, commodityRecords, transactionRecords, feasibilityScenarios } from "./schema";
 import { hashPassword } from "../lib/password";
+import { calculateFeasibility, type FeasibilityInput, NO_ADJUSTMENT } from "../engine";
 
 const seedClient = postgres(process.env.DATABASE_URL!, { max: 1 });
 const db = drizzle(seedClient);
 
 async function main() {
-  console.log("Starting DB seed...");
+  console.log("🌊 Seeding BAHARI Intelligence demo dataset...");
 
   // 1. Cooperatives
-  console.log("Seeding cooperatives...");
-  const [coop1, coop2] = await db.insert(cooperatives).values([
-    {
-      name: "Koperasi Nelayan Sejahtera",
-      registrationNumber: "KOP-12345",
-      villageName: "Desa Pesisir Utara",
-      district: "Kecamatan Bahari",
-      province: "Jawa Timur",
-      contactPerson: "Bapak Budi",
-      phone: "081234567890",
-    },
-    {
-      name: "Koperasi Rumput Laut Jaya",
-      registrationNumber: "KOP-54321",
-      villageName: "Desa Karang Selatan",
-      district: "Kecamatan Bahari",
-      province: "Jawa Timur",
-      contactPerson: "Ibu Siti",
-      phone: "089876543210",
-    }
-  ]).returning();
+  const [coop] = await db.insert(cooperatives).values({
+    name: "Koperasi Nelayan Bahari",
+    village: "Desa Tanjung Biru",
+    region: "Kabupaten Pesisir Selatan",
+    totalMembers: 45,
+    activeMembers: 32,
+    mainCommodities: ["Ikan Tuna", "Rumput Laut", "Udang", "Kerang", "Ikan Olahan"],
+    contactPerson: "Bapak Haji Rahman",
+    phone: "081234567890",
+  }).returning();
 
   // 2. Users
-  console.log("Seeding users...");
-  const adminPassword = await hashPassword("admin123");
-  const buyerPassword = await hashPassword("buyer123");
-
+  const pw = await hashPassword("password123");
   await db.insert(users).values([
-    {
-      name: "Super Admin",
-      email: "super@bahari.id",
-      passwordHash: adminPassword,
-      role: "super_admin",
-    },
-    {
-      name: "Admin Coop 1",
-      email: "admin1@bahari.id",
-      passwordHash: adminPassword,
-      role: "cooperative_admin",
-      cooperativeId: coop1.id,
-    },
-    {
-      name: "Admin Coop 2",
-      email: "admin2@bahari.id",
-      passwordHash: adminPassword,
-      role: "cooperative_admin",
-      cooperativeId: coop2.id,
-    },
-    {
-      name: "John Buyer",
-      email: "buyer@bahari.id",
-      passwordHash: buyerPassword,
-      role: "buyer",
-    }
+    { name: "Admin Bahari", email: "admin@bahari.id", passwordHash: pw, role: "admin" },
+    { name: "Rahman Manager", email: "manager@bahari.id", passwordHash: pw, role: "cooperative_manager", cooperativeId: coop.id },
+    { name: "Siti Operator", email: "operator@bahari.id", passwordHash: pw, role: "operator", cooperativeId: coop.id },
+    { name: "Reviewer Dinas", email: "reviewer@bahari.id", passwordHash: pw, role: "reviewer", cooperativeId: coop.id },
   ]);
 
-  // 3. Producers
-  console.log("Seeding producers...");
-  const [prod1, prod2] = await db.insert(producers).values([
-    {
-      cooperativeId: coop1.id,
-      name: "Pak Nelayan 1",
-      producerType: "fisherman",
-      phone: "08111111111",
-      status: "active",
-    },
-    {
-      cooperativeId: coop2.id,
-      name: "Bu Rumput Laut 1",
-      producerType: "seaweed_farmer",
-      phone: "08222222222",
-      status: "active",
-    }
-  ]).returning();
+  // 3. Commodity records (5 commodities, 3 entries each = 15 records spread over 3 months)
+  const commodities = [
+    { name: "Ikan Tuna Segar", category: "ikan", unit: "kg", buyPrice: 45000, sellPrice: 58000, spoilage: 0.05, source: "Kelompok Nelayan Harapan" },
+    { name: "Rumput Laut Kering", category: "rumput_laut", unit: "kg", buyPrice: 12000, sellPrice: 18000, spoilage: 0.03, source: "Kelompok Tani Pesisir" },
+    { name: "Udang Segar", category: "udang", unit: "kg", buyPrice: 65000, sellPrice: 85000, spoilage: 0.08, source: "Kelompok Nelayan Maju" },
+    { name: "Kerang Hijau", category: "kerang", unit: "kg", buyPrice: 15000, sellPrice: 22000, spoilage: 0.04, source: "Kelompok Pesisir Jaya" },
+    { name: "Ikan Olahan Asap", category: "olahan", unit: "pack", buyPrice: 25000, sellPrice: 38000, spoilage: 0.02, source: "Kelompok Pengolah Mina" },
+  ];
 
-  // 4. Commodities
-  console.log("Seeding commodities...");
-  const [comm1, comm2] = await db.insert(commodities).values([
-    {
-      name: "Ikan Tuna Segar",
-      category: "fresh_seafood",
-      unit: "kg",
-      storageType: "chilled",
-    },
-    {
-      name: "Rumput Laut Kering",
-      category: "seaweed",
-      unit: "kg",
-      storageType: "dry_storage",
+  const months = ["2026-04", "2026-05", "2026-06"];
+  const commodityRecordsList: any[] = [];
+  for (const c of commodities) {
+    for (let m = 0; m < 3; m++) {
+      const vol = Math.round((200 + Math.random() * 300) * 100) / 100;
+      commodityRecordsList.push({
+        cooperativeId: coop.id,
+        commodityName: c.name,
+        category: c.category,
+        volume: String(vol),
+        unit: c.unit,
+        sourceGroup: c.source,
+        buyPrice: String(c.buyPrice),
+        expectedSellPrice: String(c.sellPrice),
+        actualSellPrice: String(Math.round(c.sellPrice * (0.9 + Math.random() * 0.15))),
+        spoilagePercentage: String(c.spoilage),
+        date: `${months[m]}-15`,
+      });
     }
-  ]).returning();
+  }
+  const insertedCommodities = await db.insert(commodityRecords).values(commodityRecordsList).returning();
 
-  // 5. Commodity Batches
-  console.log("Seeding batches...");
-  const [batch1, batch2] = await db.insert(commodityBatches).values([
-    {
-      cooperativeId: coop1.id,
-      producerId: prod1.id,
-      commodityId: comm1.id,
-      batchCode: "BATCH-20260624-A1B2",
-      quantity: "50.00",
-      unit: "kg",
-      status: "verified",
-      qualityStatus: "fresh",
-      basePrice: "40000.00",
-    },
-    {
-      cooperativeId: coop2.id,
-      producerId: prod2.id,
-      commodityId: comm2.id,
-      batchCode: "BATCH-20260624-C3D4",
-      quantity: "100.00",
-      unit: "kg",
-      status: "verified",
-      qualityStatus: "dried",
-      basePrice: "15000.00",
-    }
-  ]).returning();
+  // 4. Transaction records (~30 transactions across buyer types)
+  const buyerTypes = ["restoran", "hotel", "retail", "rumah_tangga"];
+  const paymentStatuses = ["paid", "pending", "delayed"] as const;
+  const txList: any[] = [];
 
-  // 6. Marketplace Listings
-  console.log("Seeding listings...");
-  await db.insert(marketplaceListings).values([
-    {
-      cooperativeId: coop1.id,
-      commodityBatchId: batch1.id,
-      title: "Ikan Tuna Segar Premium (Tangkapan Hari Ini)",
-      pricePerUnit: "45000.00",
-      availableQuantity: "50.00",
-      minimumOrder: "5.00",
-      listingStatus: "active",
-    },
-    {
-      cooperativeId: coop2.id,
-      commodityBatchId: batch2.id,
-      title: "Rumput Laut Kering Kualitas A",
-      pricePerUnit: "18000.00",
-      availableQuantity: "100.00",
-      minimumOrder: "10.00",
-      listingStatus: "active",
-    }
-  ]);
+  for (let i = 0; i < 30; i++) {
+    const cmd = insertedCommodities[i % insertedCommodities.length];
+    const vol = Math.round((20 + Math.random() * 80) * 100) / 100;
+    const sellingPrice = Math.round(Number(cmd.expectedSellPrice) * (0.85 + Math.random() * 0.25));
+    const gross = Math.round(vol * sellingPrice);
+    txList.push({
+      cooperativeId: coop.id,
+      commodityRecordId: cmd.id,
+      buyerType: buyerTypes[i % 4],
+      volumeSold: String(vol),
+      sellingPrice: String(sellingPrice),
+      grossValue: String(gross),
+      logisticsCost: String(Math.round(gross * 0.05)),
+      storageCost: String(Math.round(gross * 0.02)),
+      paymentStatus: paymentStatuses[i % 3],
+      date: `${months[i % 3]}-${String(5 + (i % 25)).padStart(2, "0")}`,
+    });
+  }
+  await db.insert(transactionRecords).values(txList);
 
-  // 7. Eco Points
-  console.log("Seeding eco points...");
-  await db.insert(ecoPointTransactions).values([
-    {
-      producerId: prod1.id,
-      cooperativeId: coop1.id,
-      activityType: "plastic_deposit",
-      description: "Setor 5kg sampah plastik dari laut",
-      points: 50,
-      status: "approved",
-    },
-    {
-      producerId: prod2.id,
-      cooperativeId: coop2.id,
-      activityType: "coastal_cleanup",
-      description: "Ikut kerja bakti bersih pantai",
-      points: 100,
-      status: "approved",
-    }
-  ]);
+  // 5. Feasibility scenarios (pre-computed via engine)
+  const feasibilityInput: FeasibilityInput = {
+    capex: 50_000_000,
+    monthlyOpex: 5_000_000,
+    monthlyRevenue: 12_000_000,
+    margin: 0.35,
+    discountRate: 0.12,
+    projectionMonths: 24,
+    growthRate: 0.02,
+    logisticsCost: 1_000_000,
+    spoilageAssumption: 0.05,
+  };
 
-  console.log("✅ Seed complete!");
+  const scenarios = [
+    { name: "optimis", priceAdj: 0.1, costAdj: -0.05, spoilAdj: -0.02, delayDays: 0 },
+    { name: "moderat", priceAdj: 0, costAdj: 0, spoilAdj: 0, delayDays: 0 },
+    { name: "pesimis", priceAdj: -0.15, costAdj: 0.1, spoilAdj: 0.05, delayDays: 14 },
+  ];
+
+  for (const s of scenarios) {
+    const result = calculateFeasibility(feasibilityInput, {
+      priceAdjustment: s.priceAdj,
+      costAdjustment: s.costAdj,
+      volumeAdjustment: 0,
+      spoilageAdjustment: s.spoilAdj,
+      paymentDelayDays: s.delayDays,
+    });
+    await db.insert(feasibilityScenarios).values({
+      cooperativeId: coop.id,
+      scenarioName: s.name,
+      capex: String(feasibilityInput.capex),
+      monthlyOpex: String(feasibilityInput.monthlyOpex),
+      monthlyRevenue: String(feasibilityInput.monthlyRevenue),
+      margin: String(feasibilityInput.margin),
+      discountRate: String(feasibilityInput.discountRate),
+      growthRate: String(feasibilityInput.growthRate),
+      projectionMonths: feasibilityInput.projectionMonths,
+      logisticsCost: String(feasibilityInput.logisticsCost),
+      spoilageAssumption: String(feasibilityInput.spoilageAssumption),
+      priceAdjustment: String(s.priceAdj),
+      costAdjustment: String(s.costAdj),
+      spoilageAdjustment: String(s.spoilAdj),
+      paymentDelayDays: s.delayDays,
+      resultNpv: String(Math.round(result.npv)),
+      resultIrr: result.irr !== null ? String(result.irr) : null,
+      resultPaybackPeriod: result.paybackPeriod !== null ? String(result.paybackPeriod) : null,
+      resultBcr: String(result.bcr),
+      resultStatus: result.status,
+    });
+  }
+
+  console.log("✅ BAHARI Intelligence seed complete!");
+  console.log(`   - 1 cooperative: ${coop.name}`);
+  console.log(`   - 4 users (admin / manager / operator / reviewer)`);
+  console.log(`   - ${commodityRecordsList.length} commodity records`);
+  console.log(`   - ${txList.length} transaction records`);
+  console.log(`   - 3 feasibility scenarios (optimis/moderat/pesimis)`);
   await seedClient.end();
 }
 

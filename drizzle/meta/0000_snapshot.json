@@ -1,5 +1,5 @@
 {
-  "id": "a9ac4791-512a-457b-b12d-09f272021d86",
+  "id": "f0f5431c-3f8a-466a-bf18-3909721cbd41",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -59,7 +59,59 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "audit_logs_user_idx": {
+          "name": "audit_logs_user_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "audit_logs_entity_idx": {
+          "name": "audit_logs_entity_idx",
+          "columns": [
+            {
+              "expression": "entity_type",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "entity_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "audit_logs_created_idx": {
+          "name": "audit_logs_created_idx",
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
@@ -67,83 +119,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.commodities": {
-      "name": "commodities",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "category": {
-          "name": "category",
-          "type": "commodity_category",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "unit": {
-          "name": "unit",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "description": {
-          "name": "description",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "storage_type": {
-          "name": "storage_type",
-          "type": "storage_type",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'none'"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "commodities_name_unique": {
-          "name": "commodities_name_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "name"
-          ]
-        }
-      },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.commodity_batches": {
-      "name": "commodity_batches",
+    "public.commodity_records": {
+      "name": "commodity_records",
       "schema": "",
       "columns": {
         "id": {
@@ -159,27 +136,21 @@
           "primaryKey": false,
           "notNull": true
         },
-        "producer_id": {
-          "name": "producer_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "commodity_id": {
-          "name": "commodity_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "batch_code": {
-          "name": "batch_code",
+        "commodity_name": {
+          "name": "commodity_name",
           "type": "text",
           "primaryKey": false,
           "notNull": true
         },
-        "quantity": {
-          "name": "quantity",
-          "type": "numeric(12, 2)",
+        "category": {
+          "name": "category",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "volume": {
+          "name": "volume",
+          "type": "numeric(14, 2)",
           "primaryKey": false,
           "notNull": true
         },
@@ -189,50 +160,49 @@
           "primaryKey": false,
           "notNull": true
         },
-        "grade": {
-          "name": "grade",
+        "source_group": {
+          "name": "source_group",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
-        "production_date": {
-          "name": "production_date",
-          "type": "date",
+        "buy_price": {
+          "name": "buy_price",
+          "type": "numeric(14, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expected_sell_price": {
+          "name": "expected_sell_price",
+          "type": "numeric(14, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "actual_sell_price": {
+          "name": "actual_sell_price",
+          "type": "numeric(14, 2)",
           "primaryKey": false,
           "notNull": false
         },
-        "harvest_location": {
-          "name": "harvest_location",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "base_price": {
-          "name": "base_price",
-          "type": "numeric(15, 2)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "quality_status": {
-          "name": "quality_status",
-          "type": "quality_status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "status": {
-          "name": "status",
-          "type": "batch_status",
-          "typeSchema": "public",
+        "spoilage_percentage": {
+          "name": "spoilage_percentage",
+          "type": "numeric(6, 4)",
           "primaryKey": false,
           "notNull": true,
-          "default": "'submitted'"
+          "default": "'0'"
         },
-        "notes": {
-          "name": "notes",
-          "type": "text",
+        "date": {
+          "name": "date",
+          "type": "date",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
+        },
+        "sync_version": {
+          "name": "sync_version",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
         },
         "created_at": {
           "name": "created_at",
@@ -249,58 +219,71 @@
           "default": "now()"
         }
       },
-      "indexes": {},
-      "foreignKeys": {
-        "commodity_batches_cooperative_id_cooperatives_id_fk": {
-          "name": "commodity_batches_cooperative_id_cooperatives_id_fk",
-          "tableFrom": "commodity_batches",
-          "tableTo": "cooperatives",
-          "columnsFrom": [
-            "cooperative_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "commodity_batches_producer_id_producers_id_fk": {
-          "name": "commodity_batches_producer_id_producers_id_fk",
-          "tableFrom": "commodity_batches",
-          "tableTo": "producers",
-          "columnsFrom": [
-            "producer_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "commodity_batches_commodity_id_commodities_id_fk": {
-          "name": "commodity_batches_commodity_id_commodities_id_fk",
-          "tableFrom": "commodity_batches",
-          "tableTo": "commodities",
-          "columnsFrom": [
-            "commodity_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "commodity_batches_batch_code_unique": {
-          "name": "commodity_batches_batch_code_unique",
-          "nullsNotDistinct": false,
+      "indexes": {
+        "commodity_records_coop_idx": {
+          "name": "commodity_records_coop_idx",
           "columns": [
-            "batch_code"
-          ]
+            {
+              "expression": "cooperative_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "commodity_records_name_idx": {
+          "name": "commodity_records_name_idx",
+          "columns": [
+            {
+              "expression": "commodity_name",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "commodity_records_category_idx": {
+          "name": "commodity_records_category_idx",
+          "columns": [
+            {
+              "expression": "category",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "commodity_records_date_idx": {
+          "name": "commodity_records_date_idx",
+          "columns": [
+            {
+              "expression": "date",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -322,35 +305,38 @@
           "primaryKey": false,
           "notNull": true
         },
-        "registration_number": {
-          "name": "registration_number",
+        "village": {
+          "name": "village",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
-        "village_name": {
-          "name": "village_name",
+        "region": {
+          "name": "region",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
-        "district": {
-          "name": "district",
-          "type": "text",
+        "total_members": {
+          "name": "total_members",
+          "type": "integer",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true,
+          "default": 0
         },
-        "province": {
-          "name": "province",
-          "type": "text",
+        "active_members": {
+          "name": "active_members",
+          "type": "integer",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true,
+          "default": 0
         },
-        "address": {
-          "name": "address",
-          "type": "text",
+        "main_commodities": {
+          "name": "main_commodities",
+          "type": "jsonb",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "default": "'[]'::jsonb"
         },
         "contact_person": {
           "name": "contact_person",
@@ -379,24 +365,47 @@
           "default": "now()"
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "cooperatives_registration_number_unique": {
-          "name": "cooperatives_registration_number_unique",
-          "nullsNotDistinct": false,
+      "indexes": {
+        "cooperatives_village_idx": {
+          "name": "cooperatives_village_idx",
           "columns": [
-            "registration_number"
-          ]
+            {
+              "expression": "village",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "cooperatives_region_idx": {
+          "name": "cooperatives_region_idx",
+          "columns": [
+            {
+              "expression": "region",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.eco_point_transactions": {
-      "name": "eco_point_transactions",
+    "public.feasibility_scenarios": {
+      "name": "feasibility_scenarios",
       "schema": "",
       "columns": {
         "id": {
@@ -406,154 +415,143 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "producer_id": {
-          "name": "producer_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
         "cooperative_id": {
           "name": "cooperative_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
-        "activity_type": {
-          "name": "activity_type",
-          "type": "eco_activity_type",
-          "typeSchema": "public",
+        "scenario_name": {
+          "name": "scenario_name",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
-        "description": {
-          "name": "description",
-          "type": "text",
+        "capex": {
+          "name": "capex",
+          "type": "numeric(16, 2)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
-        "points": {
-          "name": "points",
+        "monthly_opex": {
+          "name": "monthly_opex",
+          "type": "numeric(14, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "monthly_revenue": {
+          "name": "monthly_revenue",
+          "type": "numeric(14, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "margin": {
+          "name": "margin",
+          "type": "numeric(6, 4)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "discount_rate": {
+          "name": "discount_rate",
+          "type": "numeric(6, 4)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "growth_rate": {
+          "name": "growth_rate",
+          "type": "numeric(6, 4)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "projection_months": {
+          "name": "projection_months",
           "type": "integer",
           "primaryKey": false,
           "notNull": true
         },
-        "evidence_url": {
-          "name": "evidence_url",
+        "logistics_cost": {
+          "name": "logistics_cost",
+          "type": "numeric(14, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "spoilage_assumption": {
+          "name": "spoilage_assumption",
+          "type": "numeric(6, 4)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "price_adjustment": {
+          "name": "price_adjustment",
+          "type": "numeric(6, 4)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'0'"
+        },
+        "cost_adjustment": {
+          "name": "cost_adjustment",
+          "type": "numeric(6, 4)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'0'"
+        },
+        "volume_adjustment": {
+          "name": "volume_adjustment",
+          "type": "numeric(6, 4)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'0'"
+        },
+        "spoilage_adjustment": {
+          "name": "spoilage_adjustment",
+          "type": "numeric(6, 4)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'0'"
+        },
+        "payment_delay_days": {
+          "name": "payment_delay_days",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "result_npv": {
+          "name": "result_npv",
+          "type": "numeric(18, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "result_irr": {
+          "name": "result_irr",
+          "type": "numeric(10, 6)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "result_payback_period": {
+          "name": "result_payback_period",
+          "type": "numeric(10, 4)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "result_bcr": {
+          "name": "result_bcr",
+          "type": "numeric(10, 6)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "result_status": {
+          "name": "result_status",
           "type": "text",
           "primaryKey": false,
           "notNull": false
         },
-        "status": {
-          "name": "status",
-          "type": "eco_point_status",
-          "typeSchema": "public",
+        "sync_version": {
+          "name": "sync_version",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true,
-          "default": "'pending'"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "eco_point_transactions_producer_id_producers_id_fk": {
-          "name": "eco_point_transactions_producer_id_producers_id_fk",
-          "tableFrom": "eco_point_transactions",
-          "tableTo": "producers",
-          "columnsFrom": [
-            "producer_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "eco_point_transactions_cooperative_id_cooperatives_id_fk": {
-          "name": "eco_point_transactions_cooperative_id_cooperatives_id_fk",
-          "tableFrom": "eco_point_transactions",
-          "tableTo": "cooperatives",
-          "columnsFrom": [
-            "cooperative_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.marketplace_listings": {
-      "name": "marketplace_listings",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "cooperative_id": {
-          "name": "cooperative_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "commodity_batch_id": {
-          "name": "commodity_batch_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "title": {
-          "name": "title",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "description": {
-          "name": "description",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "price_per_unit": {
-          "name": "price_per_unit",
-          "type": "numeric(15, 2)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "available_quantity": {
-          "name": "available_quantity",
-          "type": "numeric(12, 2)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "minimum_order": {
-          "name": "minimum_order",
-          "type": "numeric(12, 2)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "listing_status": {
-          "name": "listing_status",
-          "type": "listing_status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'draft'"
+          "default": 1
         },
         "created_at": {
           "name": "created_at",
@@ -570,246 +568,47 @@
           "default": "now()"
         }
       },
-      "indexes": {},
-      "foreignKeys": {
-        "marketplace_listings_cooperative_id_cooperatives_id_fk": {
-          "name": "marketplace_listings_cooperative_id_cooperatives_id_fk",
-          "tableFrom": "marketplace_listings",
-          "tableTo": "cooperatives",
-          "columnsFrom": [
-            "cooperative_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "marketplace_listings_commodity_batch_id_commodity_batches_id_fk": {
-          "name": "marketplace_listings_commodity_batch_id_commodity_batches_id_fk",
-          "tableFrom": "marketplace_listings",
-          "tableTo": "commodity_batches",
-          "columnsFrom": [
-            "commodity_batch_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.order_items": {
-      "name": "order_items",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "order_id": {
-          "name": "order_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "listing_id": {
-          "name": "listing_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "commodity_name": {
-          "name": "commodity_name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "quantity": {
-          "name": "quantity",
-          "type": "numeric(12, 2)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "unit_price": {
-          "name": "unit_price",
-          "type": "numeric(15, 2)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "subtotal": {
-          "name": "subtotal",
-          "type": "numeric(15, 2)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "order_items_order_id_orders_id_fk": {
-          "name": "order_items_order_id_orders_id_fk",
-          "tableFrom": "order_items",
-          "tableTo": "orders",
-          "columnsFrom": [
-            "order_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "order_items_listing_id_marketplace_listings_id_fk": {
-          "name": "order_items_listing_id_marketplace_listings_id_fk",
-          "tableFrom": "order_items",
-          "tableTo": "marketplace_listings",
-          "columnsFrom": [
-            "listing_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.orders": {
-      "name": "orders",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "buyer_id": {
-          "name": "buyer_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "cooperative_id": {
-          "name": "cooperative_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "order_code": {
-          "name": "order_code",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "total_amount": {
-          "name": "total_amount",
-          "type": "numeric(15, 2)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "status": {
-          "name": "status",
-          "type": "order_status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'pending'"
-        },
-        "delivery_method": {
-          "name": "delivery_method",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "buyer_notes": {
-          "name": "buyer_notes",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "orders_buyer_id_users_id_fk": {
-          "name": "orders_buyer_id_users_id_fk",
-          "tableFrom": "orders",
-          "tableTo": "users",
-          "columnsFrom": [
-            "buyer_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "orders_cooperative_id_cooperatives_id_fk": {
-          "name": "orders_cooperative_id_cooperatives_id_fk",
-          "tableFrom": "orders",
-          "tableTo": "cooperatives",
-          "columnsFrom": [
-            "cooperative_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "orders_order_code_unique": {
-          "name": "orders_order_code_unique",
-          "nullsNotDistinct": false,
+      "indexes": {
+        "feasibility_scenarios_coop_idx": {
+          "name": "feasibility_scenarios_coop_idx",
           "columns": [
-            "order_code"
-          ]
+            {
+              "expression": "cooperative_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "feasibility_scenarios_name_idx": {
+          "name": "feasibility_scenarios_name_idx",
+          "columns": [
+            {
+              "expression": "scenario_name",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.producers": {
-      "name": "producers",
+    "public.transaction_records": {
+      "name": "transaction_records",
       "schema": "",
       "columns": {
         "id": {
@@ -825,80 +624,70 @@
           "primaryKey": false,
           "notNull": true
         },
-        "user_id": {
-          "name": "user_id",
+        "commodity_record_id": {
+          "name": "commodity_record_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
         },
-        "name": {
-          "name": "name",
+        "buyer_type": {
+          "name": "buyer_type",
           "type": "text",
           "primaryKey": false,
           "notNull": true
         },
-        "nik": {
-          "name": "nik",
-          "type": "text",
+        "volume_sold": {
+          "name": "volume_sold",
+          "type": "numeric(14, 2)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
-        "phone": {
-          "name": "phone",
-          "type": "text",
+        "selling_price": {
+          "name": "selling_price",
+          "type": "numeric(14, 2)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
-        "address": {
-          "name": "address",
-          "type": "text",
+        "gross_value": {
+          "name": "gross_value",
+          "type": "numeric(16, 2)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
-        "producer_type": {
-          "name": "producer_type",
-          "type": "producer_type",
+        "logistics_cost": {
+          "name": "logistics_cost",
+          "type": "numeric(14, 2)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'0'"
+        },
+        "storage_cost": {
+          "name": "storage_cost",
+          "type": "numeric(14, 2)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'0'"
+        },
+        "payment_status": {
+          "name": "payment_status",
+          "type": "payment_status",
           "typeSchema": "public",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": "'pending'"
         },
-        "business_name": {
-          "name": "business_name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "production_area": {
-          "name": "production_area",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "production_asset": {
-          "name": "production_asset",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "member_number": {
-          "name": "member_number",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "joined_at": {
-          "name": "joined_at",
+        "date": {
+          "name": "date",
           "type": "date",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
-        "status": {
-          "name": "status",
-          "type": "producer_status",
-          "typeSchema": "public",
+        "sync_version": {
+          "name": "sync_version",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true,
-          "default": "'active'"
+          "default": 1
         },
         "created_at": {
           "name": "created_at",
@@ -915,35 +704,84 @@
           "default": "now()"
         }
       },
-      "indexes": {},
-      "foreignKeys": {
-        "producers_cooperative_id_cooperatives_id_fk": {
-          "name": "producers_cooperative_id_cooperatives_id_fk",
-          "tableFrom": "producers",
-          "tableTo": "cooperatives",
-          "columnsFrom": [
-            "cooperative_id"
+      "indexes": {
+        "transaction_records_coop_idx": {
+          "name": "transaction_records_coop_idx",
+          "columns": [
+            {
+              "expression": "cooperative_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         },
-        "producers_user_id_users_id_fk": {
-          "name": "producers_user_id_users_id_fk",
-          "tableFrom": "producers",
-          "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
+        "transaction_records_commodity_idx": {
+          "name": "transaction_records_commodity_idx",
+          "columns": [
+            {
+              "expression": "commodity_record_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "columnsTo": [
-            "id"
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "transaction_records_buyer_idx": {
+          "name": "transaction_records_buyer_idx",
+          "columns": [
+            {
+              "expression": "buyer_type",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "transaction_records_payment_idx": {
+          "name": "transaction_records_payment_idx",
+          "columns": [
+            {
+              "expression": "payment_status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "transaction_records_date_idx": {
+          "name": "transaction_records_date_idx",
+          "columns": [
+            {
+              "expression": "date",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
@@ -985,16 +823,10 @@
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "default": "'buyer'"
+          "default": "'reviewer'"
         },
         "cooperative_id": {
           "name": "cooperative_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "producer_id": {
-          "name": "producer_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
@@ -1014,7 +846,38 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "users_role_idx": {
+          "name": "users_role_idx",
+          "columns": [
+            {
+              "expression": "role",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "users_cooperative_idx": {
+          "name": "users_cooperative_idx",
+          "columns": [
+            {
+              "expression": "cooperative_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
@@ -1032,134 +895,23 @@
     }
   },
   "enums": {
-    "public.eco_activity_type": {
-      "name": "eco_activity_type",
+    "public.payment_status": {
+      "name": "payment_status",
       "schema": "public",
       "values": [
-        "plastic_deposit",
-        "coastal_cleanup",
-        "waste_sorting",
-        "mangrove_activity",
-        "sustainable_production",
-        "byproduct_reuse"
-      ]
-    },
-    "public.batch_status": {
-      "name": "batch_status",
-      "schema": "public",
-      "values": [
-        "submitted",
-        "verified",
-        "stored",
-        "listed",
-        "partially_sold",
-        "sold",
-        "cancelled"
-      ]
-    },
-    "public.commodity_category": {
-      "name": "commodity_category",
-      "schema": "public",
-      "values": [
-        "fresh_seafood",
-        "aquaculture",
-        "seaweed",
-        "salt",
-        "coastal_agriculture",
-        "processed_food",
-        "handicraft",
-        "recycled_material"
-      ]
-    },
-    "public.eco_point_status": {
-      "name": "eco_point_status",
-      "schema": "public",
-      "values": [
+        "paid",
         "pending",
-        "approved",
-        "rejected"
-      ]
-    },
-    "public.listing_status": {
-      "name": "listing_status",
-      "schema": "public",
-      "values": [
-        "draft",
-        "active",
-        "paused",
-        "sold_out"
-      ]
-    },
-    "public.order_status": {
-      "name": "order_status",
-      "schema": "public",
-      "values": [
-        "pending",
-        "confirmed",
-        "packed",
-        "ready_for_pickup",
-        "delivered",
-        "completed",
-        "cancelled"
-      ]
-    },
-    "public.producer_status": {
-      "name": "producer_status",
-      "schema": "public",
-      "values": [
-        "active",
-        "inactive",
-        "suspended"
-      ]
-    },
-    "public.producer_type": {
-      "name": "producer_type",
-      "schema": "public",
-      "values": [
-        "fisherman",
-        "fish_farmer",
-        "seaweed_farmer",
-        "salt_farmer",
-        "coastal_farmer",
-        "msme_processor",
-        "women_group",
-        "recycling_group",
-        "community_group"
-      ]
-    },
-    "public.quality_status": {
-      "name": "quality_status",
-      "schema": "public",
-      "values": [
-        "fresh",
-        "chilled",
-        "frozen",
-        "dried",
-        "processed",
-        "sorted",
-        "packed"
-      ]
-    },
-    "public.storage_type": {
-      "name": "storage_type",
-      "schema": "public",
-      "values": [
-        "cold_storage",
-        "chilled",
-        "dry_storage",
-        "room_temperature",
-        "frozen",
-        "none"
+        "delayed"
       ]
     },
     "public.user_role": {
       "name": "user_role",
       "schema": "public",
       "values": [
-        "super_admin",
-        "cooperative_admin",
-        "producer",
-        "buyer"
+        "admin",
+        "cooperative_manager",
+        "operator",
+        "reviewer"
       ]
     }
   },
