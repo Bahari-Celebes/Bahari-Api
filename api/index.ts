@@ -11,6 +11,10 @@ import { scenarioRoutes } from "../src/modules/scenarios/scenarios.routes.js";
 import { impactRoutes } from "../src/modules/impact/impact.routes.js";
 import { aiCopilotRoutes } from "../src/modules/ai-copilot/ai-copilot.routes.js";
 import { syncRoutes } from "../src/modules/sync/sync.routes.js";
+import { priceRadarRoutes } from "../src/modules/price-radar/price-radar.routes.js";
+import { demandMapRoutes } from "../src/modules/demand-map/demand-map.routes.js";
+import { predictionRoutes } from "../src/modules/predictions/predictions.routes.js";
+import { healthIndexRoutes } from "../src/modules/health-index/health-index.routes.js";
 import { errorHandler } from "../src/middleware/error-handler.js";
 import type { AppEnv } from "../src/lib/types.js";
 
@@ -35,5 +39,9 @@ app.route("/scenarios", scenarioRoutes);
 app.route("/impact", impactRoutes);
 app.route("/ai", aiCopilotRoutes);
 app.route("/sync", syncRoutes);
+app.route("/price-radar", priceRadarRoutes);
+app.route("/demand-map", demandMapRoutes);
+app.route("/predictions", predictionRoutes);
+app.route("/health-index", healthIndexRoutes);
 
 export default app;
