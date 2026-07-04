@@ -13,6 +13,10 @@ import { scenarioRoutes } from "./modules/scenarios/scenarios.routes.js";
 import { impactRoutes } from "./modules/impact/impact.routes.js";
 import { aiCopilotRoutes } from "./modules/ai-copilot/ai-copilot.routes.js";
 import { syncRoutes } from "./modules/sync/sync.routes.js";
+import { priceRadarRoutes } from "./modules/price-radar/price-radar.routes.js";
+import { demandMapRoutes } from "./modules/demand-map/demand-map.routes.js";
+import { predictionRoutes } from "./modules/predictions/predictions.routes.js";
+import { healthIndexRoutes } from "./modules/health-index/health-index.routes.js";
 import { errorHandler } from "./middleware/error-handler.js";
 import type { AppEnv } from "./lib/types.js";
 
@@ -40,7 +44,7 @@ app.get("/health", (c) => {
     data: {
       status: "ok",
       timestamp: new Date().toISOString(),
-      version: "0.2.0",
+      version: "0.3.0",
     },
   });
 });
@@ -56,6 +60,10 @@ app.route("/scenarios", scenarioRoutes);
 app.route("/impact", impactRoutes);
 app.route("/ai", aiCopilotRoutes);
 app.route("/sync", syncRoutes);
+app.route("/price-radar", priceRadarRoutes);
+app.route("/demand-map", demandMapRoutes);
+app.route("/predictions", predictionRoutes);
+app.route("/health-index", healthIndexRoutes);
 
 app.notFound((c) => {
   return c.json(
