@@ -1,6 +1,6 @@
 import { pgTable, text, numeric, timestamp, uuid, integer, index } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
-import { cooperatives } from "./cooperatives";
+import { cooperatives } from "./cooperatives.js";
 
 export const outletLocations = pgTable(
   "outlet_locations",

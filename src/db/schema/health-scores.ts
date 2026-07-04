@@ -1,6 +1,6 @@
 import { pgTable, text, numeric, date, integer, timestamp, uuid, index } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
-import { cooperatives } from "./cooperatives";
+import { cooperatives } from "./cooperatives.js";
 
 export const healthScores = pgTable(
   "health_scores",
